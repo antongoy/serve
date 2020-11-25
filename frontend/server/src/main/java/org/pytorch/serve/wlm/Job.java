@@ -108,8 +108,9 @@ public class Job {
          * by external clients.
          */
         if (ctx != null) {
+            String requestId = input.getRequestId()
             MetricAggregator.handleInferenceMetric(
-                    modelName, modelVersion, scheduled - begin, inferTime);
+                    modelName, modelVersion, requestId, scheduled - begin, inferTime);
             NettyUtils.sendHttpResponse(ctx, resp, true);
         }
         logger.debug(

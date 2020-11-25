@@ -1,12 +1,10 @@
 package org.pytorch.serve.metrics.format.prometheous;
 
 import io.prometheus.client.Counter;
-import java.util.UUID;
 
 public final class PrometheusMetricManager {
 
     private static final PrometheusMetricManager METRIC_MANAGER = new PrometheusMetricManager();
-    private static final String METRICS_UUID = UUID.randomUUID().toString();
     private Counter inferRequestCount;
     private Counter inferLatency;
     private Counter queueLatency;
@@ -47,10 +45,11 @@ public final class PrometheusMetricManager {
      * @param inferTime time in nanoseconds
      * @param modelName name of the model
      * @param modelVersion version of the model
+     * @param requestId id of the request
      */
-    public void incInferLatency(long inferTime, String modelName, String modelVersion) {
+    public void incInferLatency(long inferTime, String modelName, String modelVersion, String requestId) {
         inferLatency
-                .labels(METRICS_UUID, modelName, getOrDefaultModelVersion(modelVersion))
+                .labels(requestId, modelName, getOrDefaultModelVersion(modelVersion))
                 .inc(inferTime / 1000.0);
     }
 
@@ -60,10 +59,11 @@ public final class PrometheusMetricManager {
      * @param queueTime time in nanoseconds
      * @param modelName name of the model
      * @param modelVersion version of the model
+     * @param requestId id of the request
      */
-    public void incQueueLatency(long queueTime, String modelName, String modelVersion) {
+    public void incQueueLatency(long queueTime, String modelName, String modelVersion, String requestId) {
         queueLatency
-                .labels(METRICS_UUID, modelName, getOrDefaultModelVersion(modelVersion))
+                .labels(requestId, modelName, getOrDefaultModelVersion(modelVersion))
                 .inc(queueTime / 1000.0);
     }
 
@@ -72,10 +72,11 @@ public final class PrometheusMetricManager {
      *
      * @param modelName name of the model
      * @param modelVersion version of the model
+     * @param requestId id of the request
      */
-    public void incInferCount(String modelName, String modelVersion) {
+    public void incInferCount(String modelName, String modelVersion, String requestId) {
         inferRequestCount
-                .labels(METRICS_UUID, modelName, getOrDefaultModelVersion(modelVersion))
+                .labels(requestId, modelName, getOrDefaultModelVersion(modelVersion))
                 .inc();
     }
 }

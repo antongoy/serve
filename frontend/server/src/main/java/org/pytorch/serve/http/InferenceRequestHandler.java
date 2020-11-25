@@ -177,7 +177,8 @@ public class InferenceRequestHandler extends HttpRequestHandlerChain {
             return;
         }
 
-        MetricAggregator.handleInferenceMetric(modelName, modelVersion);
+        String requestId = input.getRequestId()
+        MetricAggregator.handleInferenceMetric(modelName, modelVersion, requestId);
         Job job = new Job(ctx, modelName, modelVersion, WorkerCommands.PREDICT, input);
         if (!ModelManager.getInstance().addJob(job)) {
             String responseMessage =
