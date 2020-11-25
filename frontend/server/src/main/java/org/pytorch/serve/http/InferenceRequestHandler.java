@@ -201,7 +201,7 @@ public class InferenceRequestHandler extends HttpRequestHandlerChain {
     private static RequestInput parseRequest(
             ChannelHandlerContext ctx, FullHttpRequest req, QueryStringDecoder decoder) {
         String defaultRequestId = NettyUtils.getRequestId(ctx.channel());
-        String requestId = req.headers().get('X-REQUEST-ID', defaultRequestId)
+        String requestId = req.headers().get("X-REQUEST-ID", defaultRequestId);
         RequestInput inputData = new RequestInput(requestId);
         if (decoder != null) {
             for (Map.Entry<String, List<String>> entry : decoder.parameters().entrySet()) {
