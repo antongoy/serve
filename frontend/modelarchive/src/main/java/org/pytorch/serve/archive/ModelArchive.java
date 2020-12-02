@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -68,8 +69,8 @@ public class ModelArchive {
 
                 String[] urlParts = url.getAuthority().split("@", 2);
 
-                if (parts.length > 1) {
-                    String authString = parts[0];
+                if (urlParts.length > 1) {
+                    String authString = urlParts[0];
 
                     byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
                     String authStringEnc = new String(authEncBytes);
@@ -85,7 +86,7 @@ public class ModelArchive {
             }
         }
 
-        if (url.contains("..")) {
+        if (urlString.contains("..")) {
             throw new ModelNotFoundException("Relative path is not allowed in url: " + urlString);
         }
 
@@ -96,7 +97,7 @@ public class ModelArchive {
         if (modelLocation.isFile()) {
             try (InputStream is = Files.newInputStream(modelLocation.toPath())) {
                 File unzipDir = unzip(is, null);
-                return load(url, unzipDir, true);
+                return load(urlString, unzipDir, true);
             }
         }
 
