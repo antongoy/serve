@@ -65,6 +65,7 @@ public class ModelArchive {
                 FileUtils.copyURLToFile(new URL(url), modelLocation);
             } catch (IOException e) {
                 FileUtils.deleteQuietly(modelLocation);
+                log.error("Failed to download model. Error occurred:", exception);
                 throw new DownloadModelException("Failed to download model from: " + url, e);
             }
         }
