@@ -67,6 +67,8 @@ public class ModelArchive {
                 URL url = new URL(urlString);
                 URLConnection urlConnection = url.openConnection();
 
+                logger.info("Authority Part:", url.getAuthority())
+
                 String[] urlParts = url.getAuthority().split("@", 2);
 
                 if (urlParts.length > 1) {
