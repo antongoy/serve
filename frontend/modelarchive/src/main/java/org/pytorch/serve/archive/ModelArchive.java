@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -47,35 +48,49 @@ public class ModelArchive {
     }
 
     public static ModelArchive downloadModel(
-            List<String> allowedUrls, String modelStore, String url)
+            List<String> allowedUrls, String modelStore, String urlString)
             throws ModelException, FileAlreadyExistsException, IOException {
 
         if (modelStore == null) {
             throw new ModelNotFoundException("Model store has not been configured.");
         }
 
-        String marFileName = FilenameUtils.getName(url);
+        String marFileName = FilenameUtils.getName(urlString);
         File modelLocation = new File(modelStore, marFileName);
 
-        if (checkAllowedUrl(allowedUrls, url)) {
+        if (checkAllowedUrl(allowedUrls, urlString)) {
             if (modelLocation.exists()) {
                 throw new FileAlreadyExistsException(marFileName);
             }
             try {
-                FileUtils.copyURLToFile(new URL(url), modelLocation);
+                URL url = new URL(urlString);
+                URLConnection urlConnection = url.openConnection();
+
+                String[] urlParts = url.getAuthority().split("@", 2);
+
+                if (parts.length > 1) {
+                    String authString = parts[0];
+
+                    byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
+                    String authStringEnc = new String(authEncBytes);
+
+                    urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+                }
+
+                FileUtils.copyURLToFile(urlConnection.getURL(), modelLocation);
             } catch (IOException e) {
                 FileUtils.deleteQuietly(modelLocation);
                 logger.error("Failed to download model. Error occurred:", e);
-                throw new DownloadModelException("Failed to download model from: " + url, e);
+                throw new DownloadModelException("Failed to download model from: " + urlString, e);
             }
         }
 
         if (url.contains("..")) {
-            throw new ModelNotFoundException("Relative path is not allowed in url: " + url);
+            throw new ModelNotFoundException("Relative path is not allowed in url: " + urlString);
         }
 
         if (!modelLocation.exists()) {
-            throw new ModelNotFoundException("Model not found in model store: " + url);
+            throw new ModelNotFoundException("Model not found in model store: " + urlString);
         }
 
         if (modelLocation.isFile()) {
@@ -85,7 +100,7 @@ public class ModelArchive {
             }
         }
 
-        throw new ModelNotFoundException("Model not found at: " + url);
+        throw new ModelNotFoundException("Model not found at: " + urlString);
     }
 
     public static boolean checkAllowedUrl(List<String> allowedUrls, String url)
